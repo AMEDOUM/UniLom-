@@ -16,31 +16,29 @@
             
             <!-- Barre de recherche et filtres -->
             <div class="bg-white p-6 rounded-xl shadow-md">
-                <div class="grid md:grid-cols-4 gap-4">
+                <form id="filterForm" class="grid md:grid-cols-4 gap-4">
                     <!-- Recherche par nom -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
-                        <input type="text" placeholder="Nom de l'université..." 
+                        <input type="text" id="searchInput" placeholder="Nom de l'université..." 
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     
-                    <!-- Filtre par domaine -->
+                    <!-- Filtre par ville -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Domaine</label>
-                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-                            <option value="">Tous les domaines</option>
-                            <option value="sciences">Sciences</option>
-                            <option value="droit">Droit</option>
-                            <option value="medecine">Médecine</option>
-                            <option value="commerce">Commerce</option>
-                            <option value="ingenierie">Ingénierie</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
+                        <select id="villeFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Toutes les villes</option>
+                            @foreach($universites->pluck('ville')->unique() as $ville)
+                                <option value="{{ $ville }}">{{ $ville }}</option>
+                            @endforeach
                         </select>
                     </div>
                     
                     <!-- Filtre par type -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <select id="typeFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                             <option value="">Public & Privé</option>
                             <option value="public">Public</option>
                             <option value="prive">Privé</option>
@@ -49,19 +47,19 @@
                     
                     <!-- Bouton recherche -->
                     <div class="flex items-end">
-                        <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
-                            <i class="fas fa-search mr-2"></i>Rechercher
+                        <button type="button" onclick="resetFilters()" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 font-medium">
+                            <i class="fas fa-redo mr-2"></i>Réinitialiser
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
         
         <!-- Liste des universités -->
         @if($universites->count() > 0)
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                 @foreach($universites as $universite)
-                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 group">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 group universite-card" data-universite-id="{{ $universite->id }}">
                     <div class="p-6 flex flex-col h-full">
                         <!-- Logo et nom -->
                         <div class="flex items-center mb-4">
@@ -141,7 +139,7 @@
             </div>
         @else
         <!-- Aucune université -->
-        <div class="bg-gray-50 rounded-xl p-12 text-center">
+        <div id="emptyMessage" class="bg-gray-50 rounded-xl p-12 text-center">
             <div class="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-university text-gray-400 text-3xl"></i>
             </div>
@@ -154,7 +152,6 @@
         @endif
     </div>
 </div>
-@endsection
 
 <style>
 .line-clamp-2 {
@@ -163,4 +160,76 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+.universite-card {
+    transition: opacity 0.3s ease;
+}
+.universite-card.hidden {
+    display: none;
+}
 </style>
+
+<script>
+// Données des universités pour le filtrage
+const universitesData = {!! json_encode($universites->map(function($u) {
+    return [
+        'id' => $u->id,
+        'nom' => strtolower($u->nom),
+        'ville' => $u->ville,
+        'est_public' => $u->est_public
+    ];
+})->toArray()) !!};
+
+function filterUniversites() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const villeFilter = document.getElementById('villeFilter').value;
+    const typeFilter = document.getElementById('typeFilter').value;
+    
+    const cards = document.querySelectorAll('[data-universite-id]');
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+        const univId = card.getAttribute('data-universite-id');
+        const univ = universitesData.find(u => u.id == univId);
+        
+        if (!univ) return;
+        
+        // Filtrer par recherche
+        const matchSearch = univ.nom.includes(searchTerm);
+        
+        // Filtrer par ville
+        const matchVille = villeFilter === '' || univ.ville === villeFilter;
+        
+        // Filtrer par type
+        let matchType = typeFilter === '';
+        if (typeFilter === 'public') matchType = univ.est_public;
+        if (typeFilter === 'prive') matchType = !univ.est_public;
+        
+        // Afficher ou masquer la carte
+        if (matchSearch && matchVille && matchType) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Afficher/masquer le message vide
+    const emptyMessage = document.getElementById('emptyMessage');
+    if (emptyMessage) {
+        emptyMessage.style.display = visibleCount === 0 ? '' : 'none';
+    }
+}
+
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('villeFilter').value = '';
+    document.getElementById('typeFilter').value = '';
+    filterUniversites();
+}
+
+// Ajouter les événements aux filtres
+document.getElementById('searchInput').addEventListener('keyup', filterUniversites);
+document.getElementById('villeFilter').addEventListener('change', filterUniversites);
+document.getElementById('typeFilter').addEventListener('change', filterUniversites);
+</script>
+@endsection

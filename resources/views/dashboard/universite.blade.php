@@ -12,14 +12,27 @@
                 </h1>
                 
                 <!-- Notification validation -->
-                @if(!auth()->user()->est_valide)
+                @if(auth()->user()->est_valide)
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-8">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-400 text-xl"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700 font-medium">
+                                ✅ Votre compte a été validé ! Vous pouvez maintenant publier des formations.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @else
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-clock text-yellow-400"></i>
+                            <i class="fas fa-clock text-yellow-400 text-xl"></i>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm text-yellow-700">
+                            <p class="text-sm text-yellow-700 font-medium">
                                 ⏳ Votre compte est en attente de validation par l'administrateur.
                                 Vous pourrez publier des formations une fois validé.
                             </p>
@@ -57,16 +70,22 @@
                 
                 <!-- Informations université -->
                 <div class="bg-gray-50 p-6 rounded-xl">
-                    <h2 class="text-xl font-bold mb-4"> Informations de votre université</h2>
+                    <h2 class="text-xl font-bold mb-4"><i class="fas fa-info-circle text-blue-600 mr-2"></i>Informations de votre université</h2>
                     <div class="space-y-3">
                         <p><strong>Localisation :</strong> {{ auth()->user()->localisation ?? 'Non renseignée' }}</p>
                         <p><strong>Téléphone :</strong> {{ auth()->user()->telephone ?? 'Non renseigné' }}</p>
                         <p><strong>Email :</strong> {{ auth()->user()->email }}</p>
                         <p><strong>Statut :</strong> 
                             @if(auth()->user()->est_valide)
-                                <span class="text-green-600">✅ Validée</span>
+                                <span class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-check-circle"></i>
+                                    Validée
+                                </span>
                             @else
-                                <span class="text-yellow-600">⏳ En attente</span>
+                                <span class="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    En attente
+                                </span>
                             @endif
                         </p>
                     </div>

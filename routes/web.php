@@ -269,6 +269,54 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     })->name('utilisateurs.index');
     
     /**
+     * Afficher le formulaire d'édition d'un utilisateur
+     */
+    Route::get('/utilisateurs/{user}/edit', function(\App\Models\User $user) use ($adminCheck) {
+        $adminCheck();
+        return view('admin.utilisateurs.edit', compact('user'));
+    })->name('utilisateurs.edit');
+    
+    /**
+     * Mettre à jour un utilisateur
+     */
+    Route::patch('/utilisateurs/{user}', function(\Illuminate\Http\Request $request, \App\Models\User $user) use ($adminCheck) {
+        $adminCheck();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role' => 'required|in:etudiant,universite,admin',
+            'email_verified_at' => 'nullable|boolean',
+            'statut' => 'required|in:actif,suspendu,archive'
+        ]);
+        
+        if ($request->boolean('email_verified_at')) {
+            $validated['email_verified_at'] = now();
+        } else {
+            $validated['email_verified_at'] = null;
+        }
+        unset($validated['statut']);
+        
+        $user->update($validated);
+        
+        return back()->with('success', 'Utilisateur mis à jour avec succès !');
+    })->name('utilisateurs.update');
+    
+    /**
+     * Supprimer un utilisateur
+     */
+    Route::delete('/utilisateurs/{user}', function(\App\Models\User $user) use ($adminCheck) {
+        $adminCheck();
+        
+        if ($user->role === 'admin' && auth()->user()->id === $user->id) {
+            return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte admin !');
+        }
+        
+        $user->delete();
+        return back()->with('success', 'Utilisateur supprimé avec succès !');
+    })->name('utilisateurs.destroy');
+    
+    /**
      * ========== STATISTIQUES ==========
      * Affiche les statistiques détaillées de la plateforme
      */
@@ -345,6 +393,11 @@ Route::prefix('universites/{id}')->group(function () {
             'est_active' => true // Active automatiquement
         ]);
         
+        // Aussi marquer l'utilisateur comme validé
+        if ($universite->user) {
+            $universite->user->update(['est_valide' => true]);
+        }
+        
         // TODO: Envoyer une notification à l'université
         
         return back()->with('success', 'Université approuvée avec succès !');
@@ -366,6 +419,11 @@ Route::prefix('universites/{id}')->group(function () {
             'date_limite_correction' => now()->addDays(7), // 7 jours pour corriger
             'est_active' => false // Désactive
         ]);
+        
+        // Aussi marquer l'utilisateur comme non validé
+        if ($universite->user) {
+            $universite->user->update(['est_valide' => false]);
+        }
         
         // TODO: Envoyer une notification avec la raison
         

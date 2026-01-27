@@ -35,9 +35,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- Formulaire principal --}}
         <div class="lg:col-span-2">
-            <form method="POST" action="#" class="space-y-6">
+            <form method="POST" action="{{ route('admin.utilisateurs.update', $user) }}" class="space-y-6">
                 @csrf
-                @method('PUT')
+                @method('PATCH')
 
                 {{-- Informations personnelles --}}
                 <div class="bg-white rounded-xl shadow-md p-6">
@@ -219,7 +219,7 @@
                         class="w-full px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition text-sm">
                         <i class="fas fa-trash mr-2"></i>Supprimer le compte
                     </button>
-                    <form id="delete-form-{{ $user->id }}" action="#" method="POST" class="hidden">
+                    <form id="delete-form-{{ $user->id }}" action="{{ route('admin.utilisateurs.destroy', $user) }}" method="POST" class="hidden">
                         @csrf
                         @method('DELETE')
                     </form>

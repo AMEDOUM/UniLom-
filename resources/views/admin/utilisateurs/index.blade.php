@@ -164,17 +164,17 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex gap-2">
-                                <a href="#" class="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded hover:bg-blue-200 transition" title="Voir détails">
+                                <a href="{{ route('admin.utilisateurs.edit', $user) }}" class="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded hover:bg-blue-200 transition" title="Voir détails">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <button class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded hover:bg-yellow-200 transition" title="Éditer">
+                                <a href="{{ route('admin.utilisateurs.edit', $user) }}" class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded hover:bg-yellow-200 transition" title="Éditer">
                                     <i class="fas fa-edit"></i>
-                                </button>
+                                </a>
                                 @if($user->id !== auth()->id())
                                 <button onclick="confirmDelete({{ $user->id }})" class="px-3 py-1 bg-red-100 text-red-700 text-sm rounded hover:bg-red-200 transition" title="Supprimer">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                                <form id="delete-form-{{ $user->id }}" action="#" method="POST" class="hidden">
+                                <form id="delete-form-{{ $user->id }}" action="{{ route('admin.utilisateurs.destroy', $user) }}" method="POST" class="hidden">
                                     @csrf
                                     @method('DELETE')
                                 </form>

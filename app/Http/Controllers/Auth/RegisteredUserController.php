@@ -64,6 +64,7 @@ class RegisteredUserController extends Controller
         'telephone' => $request->telephone,
         'localisation' => $request->localisation,
         'est_valide' => $request->role === 'etudiant', // Étudiants validés direct
+        'email_verified_at' => $request->role === 'etudiant' ? now() : null, // Étudiants vérifiés automatiquement
     ]);
 
     event(new Registered($user));
