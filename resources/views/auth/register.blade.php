@@ -39,7 +39,7 @@
         </div>
 
         <!-- Formulaire -->
-        <form id="register-form" class="mt-8 space-y-6" action="{{ route('register') }}" method="POST">
+        <form id="register-form" class="mt-8 space-y-6" action="{{ route('register.store') }}" method="POST">
             @csrf
             
             <!-- Champ caché pour le rôle -->
@@ -126,6 +126,16 @@
                             </p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Politique de confidentialité -->
+            <div class="flex items-start mb-4">
+                <div class="flex items-center h-5">
+                    <input id="privacy" name="privacy" type="checkbox" required class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="privacy" class="font-medium text-gray-700">J'accepte la <a href="{{ route('privacy') }}" target="_blank" class="text-blue-600 hover:text-blue-800">politique de confidentialité</a></label>
                 </div>
             </div>
 

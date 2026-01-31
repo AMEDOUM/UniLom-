@@ -20,6 +20,11 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// Page politique de confidentialité
+Route::get('/privacy', function () {
+    return view('privacy');
+})->name('privacy');
+
 /**
  * Page de tableau de bord (redirige selon le rôle de l'utilisateur)
  */
@@ -286,16 +291,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:etudiant,universite,admin',
-            'email_verified_at' => 'nullable|boolean',
-            'statut' => 'required|in:actif,suspendu,archive'
         ]);
         
-        if ($request->boolean('email_verified_at')) {
+        // Gérer la vérification email via checkbox
+        if ($request->has('email_verified')) {
             $validated['email_verified_at'] = now();
         } else {
             $validated['email_verified_at'] = null;
         }
-        unset($validated['statut']);
+        
+        // Gérer la validation du compte via checkbox
+        $validated['est_valide'] = $request->has('est_valide') ? true : false;
         
         $user->update($validated);
         
