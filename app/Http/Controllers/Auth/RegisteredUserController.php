@@ -88,13 +88,13 @@ class RegisteredUserController extends Controller
                 'user_id' => $user->id,
                 'nom' => $request->nom_universite,
                 'sigle' => strtoupper(substr($request->nom_universite, 0, 3)),
-                'description' => null,
-                'ville' => $request->localisation ?? null,
+                'description' => 'À compléter par l\'administration',
+                'ville' => $request->localisation ?? 'Lomé',
                 'pays' => 'Togo',
-                'telephone' => $request->telephone ?? null,
+                'telephone' => $request->telephone ?? '',
                 'email' => $user->email,
                 'site_web' => null,
-                'adresse' => null,
+                'adresse' => '',
                 'est_public' => false,
                 'est_active' => false,  // En attente de validation
                 'statut_validation' => 'en_attente',
@@ -107,7 +107,7 @@ class RegisteredUserController extends Controller
             }
         }
 
-        // Rediriger vers la page de connexion
-        return redirect('/login')->with('success', 'Inscription réussie ! Veuillez vous connecter.');
-}
+        // Retourner à la page d'inscription avec message de succès
+        return redirect()->route('register')->with('success', 'Inscription réussie ! Veuillez vous connecter avec vos identifiants.');
+    }
 }

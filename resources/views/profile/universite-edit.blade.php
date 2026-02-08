@@ -118,9 +118,9 @@
                         </h3>
                         <p class="text-blue-800 text-sm mb-3">
                             @if(auth()->user()->est_valide)
-                                <span class="text-green-600 font-semibold">✅ Votre compte est validé</span> - Vous pouvez publier vos formations
+                                <span class="text-green-600 font-semibold">Votre compte est validé</span> - Vous pouvez publier vos formations
                             @else
-                                <span class="text-yellow-600 font-semibold">⏳ En attente de validation</span> - Un administrateur examinera votre profil sous peu
+                                <span class="text-yellow-600 font-semibold">En attente de validation</span> - Un administrateur examinera votre profil sous peu
                             @endif
                         </p>
                     </div>

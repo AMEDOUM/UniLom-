@@ -31,6 +31,7 @@
                         <div class="space-x-4">
                             <a href="/" class="text-gray-700 hover:text-blue-600">Accueil</a>
                             <a href="/universites" class="text-gray-700 hover:text-blue-600">Universités</a>
+                            <a href="{{ route('actualites.index') }}" class="text-gray-700 hover:text-blue-600">Actualités</a>
                             
                             @auth
                                 <!-- ⭐⭐ AJOUTEZ ICI ⭐⭐ -->

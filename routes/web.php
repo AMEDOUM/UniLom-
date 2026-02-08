@@ -7,6 +7,7 @@ use App\Http\Controllers\FavoriController;
 use App\Http\Controllers\TestOrientationController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ActualiteController;
 use App\Http\Middleware\AdminMiddleware;
 
 /**
@@ -106,6 +107,52 @@ Route::get('/universites', [UniversiteController::class, 'index'])->name('univer
  * Détail d'une université spécifique (publique)
  */
 Route::get('/universites/{universite}', [UniversiteController::class, 'show'])->name('universites.show');
+
+/**
+ * ========== ROUTES ACTUALITÉS ==========
+ * Gestion des actualités publiées par les universités
+ */
+
+/**
+ * Liste de toutes les actualités (publique)
+ */
+Route::get('/actualites', [ActualiteController::class, 'index'])->name('actualites.index');
+
+/**
+ * Détail d'une actualité spécifique (publique)
+ */
+Route::get('/actualites/{actualite}', [ActualiteController::class, 'show'])->name('actualites.show');
+
+/**
+ * Routes authentifiées pour créer/modifier/supprimer les actualités (réservé aux universités)
+ */
+Route::middleware(['auth'])->group(function () {
+    /**
+     * Formulaire de création d'une nouvelle actualité
+     */
+    Route::get('/actualites/create', [ActualiteController::class, 'create'])->name('actualites.create');
+    
+    /**
+     * Enregistrer une nouvelle actualité
+     */
+    Route::post('/actualites', [ActualiteController::class, 'store'])->name('actualites.store');
+    
+    /**
+     * Formulaire de modification d'une actualité
+     */
+    Route::get('/actualites/{actualite}/edit', [ActualiteController::class, 'edit'])->name('actualites.edit');
+    
+    /**
+     * Mettre à jour une actualité
+     */
+    Route::patch('/actualites/{actualite}', [ActualiteController::class, 'update'])->name('actualites.update');
+    Route::put('/actualites/{actualite}', [ActualiteController::class, 'update']);
+    
+    /**
+     * Supprimer une actualité
+     */
+    Route::delete('/actualites/{actualite}', [ActualiteController::class, 'destroy'])->name('actualites.destroy');
+});
 
 /**
  * ========== ROUTES FAVORIS ==========

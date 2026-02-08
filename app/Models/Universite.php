@@ -92,6 +92,17 @@ class Universite extends Model
         return $this->belongsTo(User::class, 'validee_par');
     }
 
+    /**
+     * Relation : Une université a plusieurs actualités.
+     * Clé étrangère : 'universite_id' dans la table actualites
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function actualites()
+    {
+        return $this->hasMany(Actualite::class, 'universite_id');
+    }
+
     // ==================== SCOPES ====================
 
     /**

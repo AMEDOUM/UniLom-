@@ -17,6 +17,27 @@
             </p>
         </div>
 
+        <!-- Message de succès -->
+        @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-400 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700 font-medium">
+                            {{ session('success') }}
+                        </p>
+                        <p class="text-sm text-green-600 mt-2">
+                            <a href="{{ route('login') }}" class="font-semibold underline hover:text-green-800">
+                                Cliquez ici pour vous connecter →
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Sélecteur de rôle -->
         <div class="flex space-x-4 mb-6" id="role-selector">
             <button type="button" data-role="etudiant" 
@@ -43,36 +64,48 @@
             @csrf
             
             <!-- Champ caché pour le rôle -->
-            <input type="hidden" name="role" id="role" value="etudiant">
+            <input type="hidden" name="role" id="role" value="{{ old('role', 'etudiant') }}">
             
             <!-- Champs communs -->
             <div class="space-y-4">
                 <div>
                     <label for="nom" class="block text-sm font-medium text-gray-700">Nom complet *</label>
-                    <input id="nom" name="nom" type="text" required 
-                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    <input id="nom" name="nom" type="text" required value="{{ old('nom') }}"
+                           class="mt-1 appearance-none relative block w-full px-3 py-2 border {{ $errors->has('nom') ? 'border-red-500' : 'border-gray-300' }} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                            placeholder="Votre nom et prénom">
+                    @error('nom')
+                        <p class="mt-1 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+                    @enderror
                 </div>
                 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
-                    <input id="email" name="email" type="email" required 
-                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    <input id="email" name="email" type="email" required value="{{ old('email') }}"
+                           class="mt-1 appearance-none relative block w-full px-3 py-2 border {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                            placeholder="exemple@email.com">
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+                    @enderror
                 </div>
                 
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe *</label>
                     <input id="password" name="password" type="password" required 
-                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                           class="mt-1 appearance-none relative block w-full px-3 py-2 border {{ $errors->has('password') ? 'border-red-500' : 'border-gray-300' }} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                            placeholder="Minimum 8 caractères">
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+                    @enderror
                 </div>
                 
                 <div>
                     <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmer le mot de passe *</label>
                     <input id="password_confirmation" name="password_confirmation" type="password" required 
-                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                           class="mt-1 appearance-none relative block w-full px-3 py-2 border {{ $errors->has('password_confirmation') ? 'border-red-500' : 'border-gray-300' }} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                            placeholder="Retapez votre mot de passe">
+                    @error('password_confirmation')
+                        <p class="mt-1 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -81,15 +114,15 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="date_naissance" class="block text-sm font-medium text-gray-700">Date de naissance</label>
-                        <input id="date_naissance" name="date_naissance" type="date" 
+                        <input id="date_naissance" name="date_naissance" type="date" value="{{ old('date_naissance') }}"
                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
                     <div>
                         <label for="sexe" class="block text-sm font-medium text-gray-700">Sexe</label>
                         <select id="sexe" name="sexe" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                             <option value="">Sélectionner</option>
-                            <option value="M">Masculin</option>
-                            <option value="F">Féminin</option>
+                            <option value="M" {{ old('sexe')=='M' ? 'selected' : '' }}>Masculin</option>
+                            <option value="F" {{ old('sexe')=='F' ? 'selected' : '' }}>Féminin</option>
                         </select>
                     </div>
                 </div>
@@ -99,19 +132,22 @@
             <div id="universite-fields" class="space-y-4 hidden">
                 <div>
                     <label for="nom_universite" class="block text-sm font-medium text-gray-700">Nom de l'université *</label>
-                    <input id="nom_universite" name="nom_universite" type="text" 
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    <input id="nom_universite" name="nom_universite" type="text" value="{{ old('nom_universite') }}"
+                           class="mt-1 block w-full px-3 py-2 border {{ $errors->has('nom_universite') ? 'border-red-500' : 'border-gray-300' }} rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            placeholder="Ex: Université de Lomé">
+                    @error('nom_universite')
+                        <p class="mt-1 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label for="telephone" class="block text-sm font-medium text-gray-700">Téléphone</label>
-                    <input id="telephone" name="telephone" type="text" 
+                    <input id="telephone" name="telephone" type="text" value="{{ old('telephone') }}"
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            placeholder="(+228) XX XX XX XX">
                 </div>
                 <div>
                     <label for="localisation" class="block text-sm font-medium text-gray-700">Localisation</label>
-                    <input id="localisation" name="localisation" type="text" 
+                    <input id="localisation" name="localisation" type="text" value="{{ old('localisation') }}"
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            placeholder="Lomé, Togo">
                 </div>
@@ -208,8 +244,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Activer étudiant par défaut
-    setActiveRole('etudiant');
+    // Activer le rôle en fonction de la valeur (préservée après redirection via old())
+    setActiveRole(roleField.value || 'etudiant');
     
     // Validation côté client pour les universités
     document.getElementById('register-form').addEventListener('submit', function(e) {

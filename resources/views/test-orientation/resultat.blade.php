@@ -72,7 +72,7 @@
         <!-- Top 3 recommandations -->
         <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8 mb-10">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">
-                🎓 Top 3 des domaines pour vous
+                Top 3 des domaines pour vous
             </h2>
             
             <div class="grid md:grid-cols-3 gap-6">
