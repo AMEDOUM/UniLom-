@@ -145,4 +145,17 @@ class User extends Authenticatable
     {
         return $this->role === 'etudiant';
     }
+
+    /**
+     * Relation : Un utilisateur peut gérer une université.
+     */
+    public function universite()
+    {
+        return $this->hasOne(Universite::class);
+    }
+
+    public function avis()
+    {
+        return $this->hasMany(Avis::class);
+    }
 }

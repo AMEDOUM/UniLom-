@@ -39,13 +39,36 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+        
+        // Sync avec le modèle Universite si c'est une université
+        if ($user->role === 'universite') {
+            $universite = \App\Models\Universite::where('user_id', $user->id)->first();
+            
+            if ($universite) {
+                \Illuminate\Support\Facades\Log::info('Profile Update: Syncing Universite ID ' . $universite->id);
+                $universite->update([
+                    'nom' => $request->nom_universite ?? $user->nom_universite,
+                    'email' => $request->email ?? $user->email,
+                    'telephone' => $request->telephone ?? $user->telephone,
+                    'ville' => $request->localisation ?? $user->localisation, 
+                    'adresse' => $request->localisation ?? $user->localisation,
+                    'description' => $request->description ?? $user->description,
+                    'vision' => $request->vision ?? $user->vision,
+                    'site_web' => $request->site_web ?? $user->site_web,
+                ]);
+                \Illuminate\Support\Facades\Log::info('Profile Update: Universite updated!');
+            } else {
+                \Illuminate\Support\Facades\Log::warning('Profile Update: No Universite found for user ' . $user->id);
+            }
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

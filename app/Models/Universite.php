@@ -25,6 +25,7 @@ class Universite extends Model
         'nom',              // Nom complet de l'université
         'sigle',            // Sigle ou acronyme (ex: UFPL)
         'description',      // Description de l'université
+        'vision',           // Vision/Mission de l'université
         'logo',             // URL du logo
         'site_web',         // URL du site web
         'email',            // Email de contact
@@ -101,6 +102,11 @@ class Universite extends Model
     public function actualites()
     {
         return $this->hasMany(Actualite::class, 'universite_id');
+    }
+
+    public function avis()
+    {
+        return $this->hasMany(Avis::class);
     }
 
     // ==================== SCOPES ====================

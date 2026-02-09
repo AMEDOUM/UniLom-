@@ -83,22 +83,27 @@
                         </div>
 
                         {{-- Université --}}
-                        <div class="md:col-span-2">
-                            <label for="universite_id" class="block text-sm font-medium text-gray-700 mb-1">
-                                Université *
-                            </label>
-                            <select id="universite_id" 
-                                    name="universite_id" 
-                                    required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-                                <option value="">Sélectionnez une université</option>
-                                @foreach($universites as $universite)
-                                    <option value="{{ $universite->id }}">
-                                        {{ $universite->nom }} ({{ $universite->ville }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        @if(isset($is_universite) && $is_universite)
+                            {{-- Champ caché pour l'ID de l'université --}}
+                            <input type="hidden" name="universite_id" value="{{ $universites->first()->id }}">
+                        @else
+                            <div class="md:col-span-2">
+                                <label for="universite_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Université *
+                                </label>
+                                <select id="universite_id" 
+                                        name="universite_id" 
+                                        required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                    <option value="">Sélectionnez une université</option>
+                                    @foreach($universites as $universite)
+                                        <option value="{{ $universite->id }}">
+                                            {{ $universite->nom }} ({{ $universite->ville }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
 
                         {{-- Durée --}}
                         <div>

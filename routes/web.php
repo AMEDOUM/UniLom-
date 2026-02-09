@@ -8,6 +8,7 @@ use App\Http\Controllers\TestOrientationController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ActualiteController;
+use App\Http\Controllers\AvisController;
 use App\Http\Middleware\AdminMiddleware;
 
 /**
@@ -83,15 +84,15 @@ Route::get('/dashboard', function () {
  */
 Route::get('/dashboard-etudiant', function () {
     return view('dashboard.etudiant');
-})->middleware(['auth']);
+})->middleware(['auth'])->name('dashboard.etudiant');
 
 Route::get('/dashboard-universite', function () {
     return view('dashboard.universite');
-})->middleware(['auth']);
+})->middleware(['auth'])->name('dashboard.universite');
 
 Route::get('/dashboard-admin', function () {
     return view('dashboard.admin');
-})->middleware(['auth']);
+})->middleware(['auth'])->name('dashboard.admin');
 
 /**
  * ========== ROUTES UNIVERSITÉS ==========
@@ -107,21 +108,6 @@ Route::get('/universites', [UniversiteController::class, 'index'])->name('univer
  * Détail d'une université spécifique (publique)
  */
 Route::get('/universites/{universite}', [UniversiteController::class, 'show'])->name('universites.show');
-
-/**
- * ========== ROUTES ACTUALITÉS ==========
- * Gestion des actualités publiées par les universités
- */
-
-/**
- * Liste de toutes les actualités (publique)
- */
-Route::get('/actualites', [ActualiteController::class, 'index'])->name('actualites.index');
-
-/**
- * Détail d'une actualité spécifique (publique)
- */
-Route::get('/actualites/{actualite}', [ActualiteController::class, 'show'])->name('actualites.show');
 
 /**
  * Routes authentifiées pour créer/modifier/supprimer les actualités (réservé aux universités)
@@ -153,6 +139,22 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::delete('/actualites/{actualite}', [ActualiteController::class, 'destroy'])->name('actualites.destroy');
 });
+
+/**
+ * ========== ROUTES ACTUALITÉS ==========
+ * Gestion des actualités publiées par les universités
+ */
+
+/**
+ * Liste de toutes les actualités (publique)
+ */
+Route::get('/actualites', [ActualiteController::class, 'index'])->name('actualites.index');
+
+/**
+ * Détail d'une actualité spécifique (publique)
+ * PLACÉ APRÈS LES ROUTES DE CRÉATION pour éviter les conflits d'URL
+ */
+Route::get('/actualites/{actualite}', [ActualiteController::class, 'show'])->name('actualites.show');
 
 /**
  * ========== ROUTES FAVORIS ==========
@@ -219,9 +221,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/universite/formations', [FormationController::class, 'index'])->name('formations.index');
     
     /**
+     * Statistiques de l'université
+     */
+    Route::get('/universite/statistiques', [UniversiteController::class, 'statistiques'])->name('universite.statistiques');
+    
+    /**
      * Ressource formations (créer, modifier, supprimer)
      */
     Route::resource('formations', FormationController::class);
+    
+    /**
+     * Routes des avis
+     */
+    Route::post('/universites/{universite}/avis', [AvisController::class, 'store'])->name('avis.store');
+    Route::delete('/avis/{avis}', [AvisController::class, 'destroy'])->name('avis.destroy');
 });
 
 /**
@@ -263,36 +276,22 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     /**
      * Liste de toutes les universités (vue admin)
      */
-    Route::get('/universites', function() use ($adminCheck) {
-        $adminCheck();
-        $universites = \App\Models\Universite::withCount('formations')->latest()->paginate(15); // 15 par page;
-        return view('admin.universites.index', compact('universites'));
-    })->name('universites.index');
+    Route::get('/universites', [\App\Http\Controllers\AdminUniversiteController::class, 'index'])->name('universites.index');
     
     /**
      * Formulaire d'édition d'une université
      */
-    Route::get('/universites/{id}/edit', function($id) use ($adminCheck) {
-        $adminCheck();
-        $universite = \App\Models\Universite::findOrFail($id);
-        return view('admin.universites.edit', compact('universite'));
-    })->name('universites.edit');
+    Route::get('/universites/{id}/edit', [\App\Http\Controllers\AdminUniversiteController::class, 'edit'])->name('universites.edit');
     
     /**
      * Mise à jour d'une université
      */
-    Route::put('/universites/{id}', function(\Illuminate\Http\Request $request, $id) use ($adminCheck) {
-        $adminCheck();
-        // ... logique de mise à jour
-    })->name('universites.update');
+    Route::put('/universites/{id}', [\App\Http\Controllers\AdminUniversiteController::class, 'update'])->name('universites.update');
     
     /**
      * Basculer le statut d'une université (actif/inactif)
      */
-    Route::put('/universites/{id}/toggle-status', function($id) use ($adminCheck) {
-        $adminCheck();
-        // ... logique toggle
-    })->name('universites.toggle-status');
+    Route::put('/universites/{id}/toggle-status', [\App\Http\Controllers\AdminUniversiteController::class, 'toggleStatus'])->name('universites.toggle-status');
     
     /**
      * ========== GESTION DES FORMATIONS ==========
@@ -314,60 +313,23 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     /**
      * Liste de tous les utilisateurs
      */
-    Route::get('/utilisateurs', function() use ($adminCheck) {
-        $adminCheck();
-        $users = \App\Models\User::latest()->get();
-        return view('admin.utilisateurs.index', compact('users'));
-    })->name('utilisateurs.index');
+    Route::get('/utilisateurs', [\App\Http\Controllers\AdminUserController::class, 'index'])->name('utilisateurs.index');
     
     /**
      * Afficher le formulaire d'édition d'un utilisateur
      */
-    Route::get('/utilisateurs/{user}/edit', function(\App\Models\User $user) use ($adminCheck) {
-        $adminCheck();
-        return view('admin.utilisateurs.edit', compact('user'));
-    })->name('utilisateurs.edit');
+    Route::get('/utilisateurs/{user}/edit', [\App\Http\Controllers\AdminUserController::class, 'edit'])->name('utilisateurs.edit');
     
     /**
      * Mettre à jour un utilisateur
      */
-    Route::patch('/utilisateurs/{user}', function(\Illuminate\Http\Request $request, \App\Models\User $user) use ($adminCheck) {
-        $adminCheck();
-        
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:etudiant,universite,admin',
-        ]);
-        
-        // Gérer la vérification email via checkbox
-        if ($request->has('email_verified')) {
-            $validated['email_verified_at'] = now();
-        } else {
-            $validated['email_verified_at'] = null;
-        }
-        
-        // Gérer la validation du compte via checkbox
-        $validated['est_valide'] = $request->has('est_valide') ? true : false;
-        
-        $user->update($validated);
-        
-        return back()->with('success', 'Utilisateur mis à jour avec succès !');
-    })->name('utilisateurs.update');
+    Route::patch('/utilisateurs/{user}', [\App\Http\Controllers\AdminUserController::class, 'update'])->name('utilisateurs.update');
+
     
     /**
      * Supprimer un utilisateur
      */
-    Route::delete('/utilisateurs/{user}', function(\App\Models\User $user) use ($adminCheck) {
-        $adminCheck();
-        
-        if ($user->role === 'admin' && auth()->user()->id === $user->id) {
-            return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte admin !');
-        }
-        
-        $user->delete();
-        return back()->with('success', 'Utilisateur supprimé avec succès !');
-    })->name('utilisateurs.destroy');
+    Route::delete('/utilisateurs/{user}', [\App\Http\Controllers\AdminUserController::class, 'destroy'])->name('utilisateurs.destroy');
     
     /**
      * ========== STATISTIQUES ==========
@@ -379,7 +341,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
         // Calcul des indicateurs principaux
         $totalUsers = \App\Models\User::count();
-        $totalUniversites = \App\Models\Universite::count();
+        $totalUniversites = \App\Models\Universite::whereHas('user')->count();
         $totalFormations = \App\Models\Formation::count();
 
         // Répartition par rôle
@@ -388,8 +350,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         $admins = \App\Models\User::where('role', 'admin')->count();
 
         // Statut des universités
-        $activeUniversites = \App\Models\Universite::where('est_active', true)->count();
-        $publicUniversites = \App\Models\Universite::where('est_public', true)->count();
+        $activeUniversites = \App\Models\Universite::whereHas('user')->where('est_active', true)->count();
+        $publicUniversites = \App\Models\Universite::whereHas('user')->where('est_public', true)->count();
 
         // Formations par domaine
         $formationsParDomaine = \App\Models\Formation::select('domaine', \DB::raw('count(*) as total'))

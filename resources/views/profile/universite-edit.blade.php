@@ -54,6 +54,20 @@
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+                        
+                        <!-- Site Web -->
+                        <div class="mb-6">
+                            <label for="site_web" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Site Web
+                            </label>
+                            <input type="url" id="site_web" name="site_web" 
+                                value="{{ auth()->user()->site_web }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                placeholder="https://www.mon-universite.tg">
+                            @error('site_web')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
                         <!-- Localisation & Téléphone -->
                         <div class="grid md:grid-cols-2 gap-6 mb-6">

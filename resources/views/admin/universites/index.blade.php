@@ -25,19 +25,19 @@
     <div class="flex flex-wrap gap-3">
         <a href="{{ route('admin.universites.index') }}" 
            class="px-4 py-2 rounded-lg {{ !request('filter') ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
-            Toutes ({{ \App\Models\Universite::count() }})
+            Toutes ({{ \App\Models\Universite::whereHas('user')->count() }})
         </a>
         <a href="{{ route('admin.universites.index', ['filter' => 'validated']) }}" 
            class="px-4 py-2 rounded-lg {{ request('filter') == 'validated' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-            Validées ({{ \App\Models\Universite::where('est_active', true)->count() }})
+            Validées ({{ \App\Models\Universite::whereHas('user')->where('statut_validation', 'approuvee')->count() }})
         </a>
         <a href="{{ route('admin.universites.index', ['filter' => 'pending']) }}" 
            class="px-4 py-2 rounded-lg {{ request('filter') == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800' }}">
-            En attente ({{ \App\Models\Universite::where('est_active', false)->count() }})
+            En attente ({{ \App\Models\Universite::whereHas('user')->where('statut_validation', 'en_attente')->count() }})
         </a>
         <a href="{{ route('admin.universites.index', ['filter' => 'active']) }}" 
            class="px-4 py-2 rounded-lg {{ request('filter') == 'active' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
-            Actives ({{ \App\Models\Universite::where('est_active', true)->count() }})
+            Actives ({{ \App\Models\Universite::whereHas('user')->where('est_active', true)->count() }})
         </a>
     </div>
 </div>

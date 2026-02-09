@@ -26,6 +26,12 @@ class ActualiteController extends Controller
     public function create()
     {
         $this->authorize('create', Actualite::class);
+
+        $universite = Universite::where('user_id', auth()->id())->first();
+        if (!$universite || !$universite->est_validee) {
+            return redirect()->route('dashboard.universite')->with('error', 'Votre compte doit être validé pour créer des actualités.');
+        }
+
         return view('actualites.create');
     }
 
@@ -45,8 +51,8 @@ class ActualiteController extends Controller
         ]);
 
         $universite = Universite::where('user_id', auth()->id())->first();
-        if (!$universite) {
-            return redirect()->route('actualites.index')->with('error', 'Vous n\'êtes pas autorisé à créer des actualités.');
+        if (!$universite || !$universite->est_validee) {
+            return redirect()->route('dashboard.universite')->with('error', 'Votre compte doit être validé pour publier des actualités.');
         }
 
         $validated['universite_id'] = $universite->id;
@@ -78,6 +84,12 @@ class ActualiteController extends Controller
     public function edit(Actualite $actualite)
     {
         $this->authorize('update', $actualite);
+
+        $universite = Universite::where('user_id', auth()->id())->first();
+        if (!$universite || !$universite->est_validee) {
+            return redirect()->route('dashboard.universite')->with('error', 'Votre compte doit être validé pour modifier des actualités.');
+        }
+
         return view('actualites.edit', compact('actualite'));
     }
 
@@ -87,6 +99,11 @@ class ActualiteController extends Controller
     public function update(Request $request, Actualite $actualite)
     {
         $this->authorize('update', $actualite);
+
+        $universite = Universite::where('user_id', auth()->id())->first();
+        if (!$universite || !$universite->est_validee) {
+            return redirect()->route('dashboard.universite')->with('error', 'Votre compte doit être validé pour modifier des actualités.');
+        }
 
         $validated = $request->validate([
             'titre' => 'required|string|max:255',
@@ -114,6 +131,11 @@ class ActualiteController extends Controller
     public function destroy(Actualite $actualite)
     {
         $this->authorize('delete', $actualite);
+
+        $universite = Universite::where('user_id', auth()->id())->first();
+        if (!$universite || !$universite->est_validee) {
+            return redirect()->route('dashboard.universite')->with('error', 'Votre compte doit être validé pour supprimer des actualités.');
+        }
 
         if ($actualite->image) {
             \Storage::disk('public')->delete($actualite->image);

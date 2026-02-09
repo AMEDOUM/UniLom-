@@ -11,12 +11,13 @@ class AdminUniversiteController extends Controller
     public function index(Request $request)
     {
         $query = Universite::withCount('formations');
+        $query->whereHas('user'); // Exclure les universités orphelines (utilisateur supprimé)
         
         // Filtres
         if ($request->filter == 'pending') {
-            $query->where('est_valide', false);
+            $query->where('statut_validation', 'en_attente');
         } elseif ($request->filter == 'validated') {
-            $query->where('est_valide', true);
+            $query->where('statut_validation', 'approuvee');
         } elseif ($request->filter == 'active') {
             $query->where('est_active', true);
         }
@@ -60,11 +61,14 @@ class AdminUniversiteController extends Controller
     public function toggleStatus($id)
     {
         $universite = Universite::findOrFail($id);
-        $universite->update(['est_valide' => !$universite->est_valide]);
         
-        $message = $universite->est_valide 
-            ? 'Université validée avec succès' 
-            : 'Université mise en attente';
+        if ($universite->statut_validation === 'approuvee') {
+            $universite->update(['statut_validation' => 'en_attente', 'est_active' => false]);
+            $message = 'Université mise en attente';
+        } else {
+            $universite->update(['statut_validation' => 'approuvee', 'est_active' => true]);
+            $message = 'Université validée avec succès';
+        }
             
         return back()->with('success', $message);
     }

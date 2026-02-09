@@ -13,7 +13,7 @@
             </div>
             <div>
                 <p class="text-sm text-gray-500">Utilisateurs total</p>
-                <h3 class="text-2xl font-bold">{{ \App\Models\User::count() }}</h3>
+                <h3 class="text-2xl font-bold">{{ \App\Models\User::where('role', '!=', 'universite')->orWhere(function($q) { $q->where('role', 'universite')->whereHas('universite'); })->count() }}</h3>
             </div>
         </div>
         <div class="mt-4 pt-4 border-t">
@@ -23,8 +23,8 @@
                     <div class="text-gray-500">Étudiants</div>
                 </div>
                 <div class="text-center">
-                    <div class="font-semibold text-blue-600">{{ \App\Models\User::where('role', 'universite')->count() }}</div>
-                    <div class="text-gray-500">Universités</div>
+                    <div class="font-semibold text-blue-600">{{ \App\Models\User::where('role', 'universite')->whereHas('universite')->count() }}</div>
+                    <div class="text-gray-500">Universités (actives)</div>
                 </div>
                 <div class="text-center">
                     <div class="font-semibold text-red-600">{{ \App\Models\User::where('role', 'admin')->count() }}</div>
@@ -42,21 +42,21 @@
             </div>
             <div>
                 <p class="text-sm text-gray-500">Universités</p>
-                <h3 class="text-2xl font-bold">{{ \App\Models\Universite::count() }}</h3>
+                <h3 class="text-2xl font-bold">{{ \App\Models\Universite::whereHas('user')->count() }}</h3>
             </div>
         </div>
         <div class="mt-4 pt-4 border-t">
             <div class="grid grid-cols-3 gap-2 text-xs">
                 <div class="text-center">
-                    <div class="font-semibold text-green-600">{{ \App\Models\Universite::where('statut_validation', 'approuvee')->count() }}</div>
+                    <div class="font-semibold text-green-600">{{ \App\Models\Universite::whereHas('user')->where('statut_validation', 'approuvee')->count() }}</div>
                     <div class="text-gray-500">Approuvées</div>
                 </div>
                 <div class="text-center">
-                    <div class="font-semibold text-yellow-600">{{ \App\Models\Universite::where('statut_validation', 'en_attente')->count() }}</div>
+                    <div class="font-semibold text-yellow-600">{{ \App\Models\Universite::whereHas('user')->where('statut_validation', 'en_attente')->count() }}</div>
                     <div class="text-gray-500">En attente</div>
                 </div>
                 <div class="text-center">
-                    <div class="font-semibold text-red-600">{{ \App\Models\Universite::where('statut_validation', 'rejetee')->count() }}</div>
+                    <div class="font-semibold text-red-600">{{ \App\Models\Universite::whereHas('user')->where('statut_validation', 'rejetee')->count() }}</div>
                     <div class="text-gray-500">Rejetées</div>
                 </div>
             </div>
@@ -90,7 +90,7 @@
 
     {{-- À valider --}}
     @php
-        $enAttenteCount = \App\Models\Universite::where('statut_validation', 'en_attente')->count();
+        $enAttenteCount = \App\Models\Universite::whereHas('user')->where('statut_validation', 'en_attente')->count();
     @endphp
     <div class="bg-white rounded-xl shadow p-6">
         <div class="flex items-center">
@@ -119,7 +119,7 @@
 
 {{-- Universités en attente (UNIQUEMENT s'il y en a) --}}
 @php
-    $dernieresEnAttente = \App\Models\Universite::where('statut_validation', 'en_attente')
+    $dernieresEnAttente = \App\Models\Universite::whereHas('user')->where('statut_validation', 'en_attente')
         ->latest()
         ->take(5)
         ->get();
@@ -201,7 +201,7 @@
             </h3>
         </div>
         <div class="divide-y">
-            @forelse(\App\Models\Universite::where('statut_validation', 'approuvee')->latest()->take(5)->get() as $universite)
+            @forelse(\App\Models\Universite::whereHas('user')->where('statut_validation', 'approuvee')->latest()->take(5)->get() as $universite)
             <div class="p-4 hover:bg-gray-50">
                 <div class="flex justify-between items-center">
                     <div>

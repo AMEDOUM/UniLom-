@@ -65,7 +65,29 @@ class FormationController extends Controller
      */
     public function create()
     {
-        // Charger toutes les universités actives pour le select
+        $user = Auth::user();
+
+        // Si c'est une université, vérifier qu'elle est validée
+        if ($user->role === 'universite') {
+            $universite = Universite::where('user_id', $user->id)->first();
+            
+            if (!$universite || !$universite->est_validee) {
+                return redirect()->route('dashboard.universite')
+                    ->with('error', 'Votre compte doit être validé par un administrateur avant de pouvoir créer des formations.');
+            }
+            
+            // Pour une université connectée, on ne lui montre pas le sélecteur (elle ne peut créer que pour elle-même)
+            // On passe une collection vide ou on gère ça dans la vue, mais ici on va just return la vue
+            // La vue devra être adaptée pour ne pas afficher le select si universite_id est forcé, 
+            // mais comme on garde la compatibilité admin, on passe quand même les universités (pour admin).
+            // Mais pour simplifier ici :
+            return view('formations.create', [
+                'universites' => collect([$universite]), // On ne passe que la sienne
+                'is_universite' => true
+            ]);
+        }
+
+        // Si c'est un admin (ou autre), on charge toutes les universités actives
         $universites = Universite::where('est_active', true)
                                  ->orderBy('nom')
                                  ->get();
@@ -84,7 +106,25 @@ class FormationController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $input = $request->all();
+
+        // Logique spécifique pour les universités
+        if ($user->role === 'universite') {
+            $universite = Universite::where('user_id', $user->id)->first();
+
+            if (!$universite || !$universite->est_validee) {
+                abort(403, 'Votre compte n\'est pas validé.');
+            }
+
+            // Forcer l'ID de l'université
+            $input['universite_id'] = $universite->id;
+        }
+
         // Validation des données du formulaire
+        // On modifie la request pour inclure universite_id si forcé, pour que la validation passe
+        $request->merge($input);
+
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
             'domaine' => 'required|string|max:100',

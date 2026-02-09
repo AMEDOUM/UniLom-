@@ -74,7 +74,7 @@
                     <i class="fas fa-university text-3xl text-blue-600"></i>
                 </div>
                 <div class="text-4xl font-bold text-blue-600 mb-2" id="count-universites">
-                    {{ \App\Models\Universite::count() }}
+                    {{ \App\Models\Universite::whereHas('user')->where('est_active', true)->count() }}
                 </div>
                 <div class="text-gray-700 font-medium">Universités</div>
                 <div class="text-gray-500 text-sm mt-1">à Lomé</div>
@@ -201,7 +201,7 @@
         <div class="grid md:grid-cols-3 gap-8">
             @php
                 // Récupérer 3 universités (ou toutes si moins de 3)
-                $universites = \App\Models\Universite::limit(3)->get();
+                $universites = \App\Models\Universite::whereHas('user')->where('est_active', true)->limit(3)->get();
             @endphp
             
             @foreach($universites as $universite)

@@ -20,7 +20,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-green-700 font-medium">
-                                ✅ Votre compte a été validé ! Vous pouvez maintenant publier des formations.
+                                Votre compte a été validé ! Vous pouvez maintenant publier des formations.
                             </p>
                         </div>
                     </div>
@@ -33,7 +33,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700 font-medium">
-                                ⏳ Votre compte est en attente de validation par l'administrateur.
+                                Votre compte est en attente de validation par l'administrateur.
                                 Vous pourrez publier des formations une fois validé.
                             </p>
                         </div>

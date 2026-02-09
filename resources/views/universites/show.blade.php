@@ -75,6 +75,17 @@
                 </div>
                 @endif
                 
+                <!-- Vision -->
+                @if($universite->vision)
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-eye text-purple-600 mr-2"></i>
+                        Notre Vision
+                    </h2>
+                    <p class="text-gray-700 leading-relaxed">{{ $universite->vision }}</p>
+                </div>
+                @endif
+                
                 <!-- Formations -->
                 @if($universite->formations && $universite->formations->count() > 0)
                 <div class="bg-white rounded-xl shadow-md p-6">
@@ -108,6 +119,119 @@
                     <p class="text-gray-600">Aucune formation disponible pour le moment</p>
                 </div>
                 @endif
+
+                <!-- Section Avis et Notes -->
+                <div class="bg-white rounded-xl shadow-md p-6 mt-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-star text-yellow-500 mr-2"></i>
+                        Avis et Notes
+                    </h2>
+
+                    <!-- Moyenne globale -->
+                    @php
+                        $moyenne = $universite->avis()->avg('note');
+                        $totalAvis = $universite->avis()->count();
+                    @endphp
+                    
+                    <div class="flex items-center mb-8 bg-gray-50 p-4 rounded-lg">
+                        <div class="mr-6 text-center">
+                            <span class="text-4xl font-bold text-gray-900">{{ number_format($moyenne, 1) }}</span>
+                            <span class="text-gray-500 text-sm">/ 5</span>
+                            <div class="text-yellow-400 text-sm my-1">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="{{ $i <= round($moyenne) ? 'fas' : 'far' }} fa-star"></i>
+                                @endfor
+                            </div>
+                            <p class="text-xs text-gray-500">{{ $totalAvis }} avis</p>
+                        </div>
+                        <div class="flex-1 border-l pl-6">
+                            <p class="text-gray-600 italic">
+                                "Les avis partagés par la communauté étudiante."
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Liste des avis -->
+                    <div class="space-y-6 mb-8">
+                        @forelse($universite->avis()->latest()->get() as $avis)
+                        <div class="border-b pb-4 last:border-b-0">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs mr-3">
+                                        {{ substr($avis->user->name, 0, 2) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-sm">{{ $avis->user->name }}</p>
+                                        <p class="text-xs text-gray-500">{{ $avis->created_at->diffForHumans() }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-yellow-400 text-xs">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="{{ $i <= $avis->note ? 'fas' : 'far' }} fa-star"></i>
+                                    @endfor
+                                </div>
+                            </div>
+                            @if($avis->commentaire)
+                                <p class="text-gray-600 text-sm ml-11 bg-gray-50 p-3 rounded-lg">{{ $avis->commentaire }}</p>
+                            @endif
+                            
+                            @if(auth()->check() && (auth()->id() === $avis->user_id || auth()->user()->role === 'admin'))
+                                <div class="mt-2 ml-11">
+                                    <form action="{{ route('avis.destroy', $avis) }}" method="POST" onsubmit="return confirm('Supprimer cet avis ?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 text-xs hover:underline">Supprimer</button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
+                        @empty
+                            <p class="text-center text-gray-500 py-4">Aucun avis pour le moment. Soyez le premier !</p>
+                        @endforelse
+                    </div>
+
+                    <!-- Formulaire d'ajout d'avis (Étudiants seulement) -->
+                    @auth
+                        @if(auth()->user()->role === 'etudiant')
+                            @if(!$universite->avis()->where('user_id', auth()->id())->exists())
+                                <div class="bg-blue-50 p-5 rounded-lg border border-blue-100">
+                                    <h3 class="font-bold text-gray-900 mb-3">Laisser un avis</h3>
+                                    <form action="{{ route('avis.store', $universite) }}" method="POST">
+                                        @csrf
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Note globale</label>
+                                            <div class="flex gap-4">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                <label class="cursor-pointer">
+                                                    <input type="radio" name="note" value="{{ $i }}" class="hidden peer" required>
+                                                    <i class="far fa-star text-2xl text-gray-400 peer-checked:text-yellow-400 hover:text-yellow-400 peer-checked:fas transition"></i>
+                                                </label>
+                                                @endfor
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="commentaire" class="block text-sm font-medium text-gray-700 mb-2">Votre commentaire (optionnel)</label>
+                                            <textarea name="commentaire" id="commentaire" rows="3" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" placeholder="Partagez votre expérience..."></textarea>
+                                        </div>
+                                        
+                                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full font-semibold">
+                                            Publier mon avis
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <div class="bg-green-50 p-4 rounded-lg text-center text-green-700">
+                                    <i class="fas fa-check-circle mr-2"></i> Vous avez déjà donné votre avis sur cette université.
+                                </div>
+                            @endif
+                        @endif
+                    @else
+                        <div class="text-center bg-gray-50 p-4 rounded-lg">
+                            <a href="{{ route('login') }}" class="text-blue-600 font-semibold hover:underline">Connectez-vous</a> pour laisser un avis.
+                        </div>
+                    @endauth
+                </div>
             </div>
             
             <!-- Colonne droite (1/3) -->

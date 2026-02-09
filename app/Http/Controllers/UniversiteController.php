@@ -26,6 +26,7 @@ class UniversiteController extends Controller
     {
         // Récupérer les universités actives avec leurs formations
         $universites = Universite::where('est_active', true)
+            ->whereHas('user') // Exclure les universités orphelines
             ->with('formations') // Charger les formations associées
             ->get();
         
@@ -45,10 +46,25 @@ class UniversiteController extends Controller
      */
     public function show(Universite $universite)
     {
+        // Incrémenter le nombre de visites
+        $universite->increment('visites');
+
         // Charger les formations associées
         $universite->load('formations');
         
         return view('universites.show', [
+            'universite' => $universite
+        ]);
+    }
+
+    /**
+     * Affiche les statistiques de l'université connectée.
+     */
+    public function statistiques()
+    {
+        $universite = Universite::where('user_id', auth()->id())->firstOrFail();
+        
+        return view('dashboard.statistiques', [
             'universite' => $universite
         ]);
     }

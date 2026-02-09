@@ -59,4 +59,22 @@ class Formation extends Model
     {
         return $this->belongsTo(Universite::class, 'universite_id');
     }
+
+    /**
+     * Accesseur pour la durée formatée.
+     * Convertit le nombre de mois en années si multiple de 12.
+     */
+    public function getDureeFormateeAttribute()
+    {
+        if (!$this->duree_mois) {
+            return 'Non défini';
+        }
+
+        if ($this->duree_mois % 12 === 0) {
+            $annees = $this->duree_mois / 12;
+            return $annees . ' an' . ($annees > 1 ? 's' : '');
+        }
+
+        return $this->duree_mois . ' mois';
+    }
 }
